@@ -23,33 +23,6 @@ function Get-Gists([String] $userName) {
     return $gists   
 }
 
-function Get-NewGists($userName, $since) {   
-    Write-Host "Checking for new gists by $($userName) since $($since)"
-    $uri = "https://api.github.com/users/{0}/gists" -f $userName
-    Write-Host $uri
-
-    $body = @{
-        since = $since
-    }
-
-    Write-Host $body
-
-    $gists = Invoke-RestMethod -Method Get -Uri $uri -Body $body
-
-    Write-Host $gists
-
-    if ($gists.Length -gt 0) {
-        Write-Host "Found $($gists.Length) new gists for $($userName)"
-        Show-Result($gists)        
-    } else {
-        Write-Host "No new gists found for $($userName)"
-    } 
-
-    $lastQueriedDateTime = Get-Date -UFormat '+%Y-%m-%dT%H:%M:%S.00Z'
-
-    Write-Host "Check finished"
-}
-
 $result = Get-Gists -userName $user
 
 if ($result.Length -gt 0) {    
@@ -75,8 +48,28 @@ $data.Since = $lastQueriedDateTime
 # Event will be added to event queue for this session
 Register-ObjectEvent -InputObject $timer -EventName "Elapsed" -SourceIdentifier "check for new gists" `
     -Action { 
-        $result = Get-NewGists -userName $Event.MessageData.UserName -since $Event.MessageData.Since
-        $result | ForEach-Object { $_ } | Format-Table | Out-Host
+        Write-Host "Checking for new gists by $($Event.MessageData.UserName) since $($Event.MessageData.Since)"
+        $uri = "https://api.github.com/users/{0}/gists" -f $Event.MessageData.UserName
+        Write-Host $uri
+
+        $body = @{
+            since = $Event.MessageData.Since
+        }
+
+        Write-Host $body
+
+        $gists = Invoke-RestMethod -Method Get -Uri $uri -Body $body
+
+        if ($gists.Length -gt 0) {
+            Write-Host "Found $($gists.Length) new gists for $($Event.MessageData.UserName)"
+            $gists | ForEach-Object { $_ } | Format-Table | Out-Host    
+        } else {
+            Write-Host "No new gists found for $($Event.MessageData.UserName)"
+        } 
+
+        $lastQueriedDateTime = Get-Date -UFormat '+%Y-%m-%dT%H:%M:%S.00Z'
+
+        Write-Host "Check finished"            
     } `
     -MessageData $data
 
