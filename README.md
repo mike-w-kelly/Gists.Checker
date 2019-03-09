@@ -8,6 +8,8 @@ Running the Powershell script is simple, navigate to its directory on the file s
 
 ![](gists-checker-defaults.gif)
 
+The list of gists is outputted to the powershell console, this could be change to output to a file. In this instance you can copy the gist url and paste it into a browser to see the full output.
+
 # Parameters
 There are a couple of parameters / switches you can use to change the default behaviour of the script.
 
