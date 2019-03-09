@@ -44,6 +44,7 @@ $timer.Enabled = $true
 $data = @{}
 $data.UserName = $user
 $data.Since = $lastQueriedDateTime
+$data.Repeat = $repeat
 
 # Event will be added to event queue for this session
 Register-ObjectEvent -InputObject $timer -EventName "Elapsed" -SourceIdentifier "check for new gists" `
@@ -69,13 +70,16 @@ Register-ObjectEvent -InputObject $timer -EventName "Elapsed" -SourceIdentifier 
 
         $lastQueriedDateTime = Get-Date -UFormat '+%Y-%m-%dT%H:%M:%S.00Z'
 
-        Write-Host "Check finished"            
+        Write-Host "Check finished"   
+        
+        if ($Event.MessageData.Repeat -eq $false) {
+            Write-Host "Repeat param not provided, unregister event"
+            Unregister-Event -SourceIdentifier "check for new gists"
+        }
     } `
     -MessageData $data
 
 Get-EventSubscriber
-
-# Unregister-Event -SourceIdentifier "check for new gists"
 
 
 
