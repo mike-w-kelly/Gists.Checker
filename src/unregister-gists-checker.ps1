@@ -1,0 +1,1 @@
+﻿Unregister-Event -SourceIdentifier "check for new gists"
